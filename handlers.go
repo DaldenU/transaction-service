@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func CreateTransactionHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,4 +70,38 @@ func ProcessPaymentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+}
+
+func RetrieveTransactionsHandler(w http.ResponseWriter, r *http.Request) {
+	customerID := r.URL.Query().Get("customerId")
+	if customerID == "" {
+		http.Error(w, "customerId is required", http.StatusBadRequest)
+		return
+	}
+
+	transactions, err := GetTransactionsByCustomerID(customerID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(transactions)
+}
+
+func CustomerTransactionsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	customerId := vars["customerId"]
+
+	if customerId == "" {
+		http.Error(w, "customerId is required", http.StatusBadRequest)
+		return
+	}
+
+	transactions, err := GetCustomerTransactions(customerId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"transactions": transactions})
 }

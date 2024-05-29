@@ -128,3 +128,41 @@ func GetTransactionRequest(transactionID string) (TransactionRequest, error) {
 
 	return transactionRequest, nil
 }
+
+func GetTransactionsByCustomerID(customerID string) ([]Transaction, error) {
+	rows, err := db.Query("SELECT id, customer_id, customer_name, customer_email, status FROM transactions WHERE customer_id = ?", customerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []Transaction
+	for rows.Next() {
+		var transaction Transaction
+		if err := rows.Scan(&transaction.ID, &transaction.CustomerID, &transaction.CustomerName, &transaction.CustomerEmail, &transaction.Status); err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
+}
+
+func GetCustomerTransactions(customerId string) ([]Transaction, error) {
+	rows, err := db.Query("SELECT id, customer_id, customer_name, customer_email, status FROM transactions WHERE customer_id = ?", customerId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []Transaction
+	for rows.Next() {
+		var transaction Transaction
+		if err := rows.Scan(&transaction.ID, &transaction.CustomerID, &transaction.CustomerName, &transaction.CustomerEmail, &transaction.Status); err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, nil
+}
