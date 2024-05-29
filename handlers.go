@@ -13,7 +13,7 @@ func CreateTransactionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Save transaction to database (placeholder function)
+	// Save transaction to database
 	transactionID, err := SaveTransaction(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -48,7 +48,13 @@ func ProcessPaymentHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		receiptPath, err := GenerateReceipt(transaction, TransactionRequest{})
+		transactionRequest, err := GetTransactionRequest(req.TransactionID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		receiptPath, err := GenerateReceipt(transaction, transactionRequest)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

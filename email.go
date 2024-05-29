@@ -13,7 +13,6 @@ const (
 	smtpPass = "kpzq rnyd wmtr kfiv"
 )
 
-// SendReceipt sends the receipt to the customer's email.
 func SendReceipt(toEmail, receiptPath string) error {
 	m := gomail.NewMessage()
 	m.SetHeader("From", smtpUser)
@@ -24,7 +23,6 @@ func SendReceipt(toEmail, receiptPath string) error {
 
 	d := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 
-	// Send the email
 	if err := d.DialAndSend(m); err != nil {
 		return fmt.Errorf("could not send email: %v", err)
 	}
