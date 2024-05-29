@@ -53,7 +53,6 @@ func GenerateReceipt(transaction Transaction, transactionRequest TransactionRequ
 		pdf.Cell(40, 10, fmt.Sprintf("%.2f x %.2f = Total: %.2f", item.Price, item.Quantity, itemTotal))
 		pdf.Ln(10)
 	}
-	pdf.Ln(10)
 	pdf.SetFont("Arial", "B", 12)
 	pdf.Cell(40, 10, "=============================================")
 	pdf.Ln(10)

@@ -1,175 +1,103 @@
-// Helper function to get customer ID from a form input
-function getCustomerId() {
-    return document.getElementById('customerId').value;
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('createTransactionBtn').addEventListener('click', createTransaction);
+    document.getElementById('addItemBtn').addEventListener('click', addItem);
+    document.getElementById('processPaymentBtn')?.addEventListener('click', processPayment);
+    document.getElementById('getTransactionsBtn')?.addEventListener('click', getCustomerTransactions);
+});
+
+function addItem() {
+    const cartItemsContainer = document.getElementById('cartItems');
+    const cartItemTemplate = document.getElementById('cartItemTemplate').content.cloneNode(true);
+    cartItemsContainer.appendChild(cartItemTemplate);
 }
 
 function createTransaction() {
+    const customerId = document.getElementById('customerId').value;
     const customerName = document.getElementById('customerName').value;
     const customerEmail = document.getElementById('customerEmail').value;
-    const cartItems = JSON.parse(document.getElementById('cartItems').value);
-    const customerId = getCustomerId();
 
-    const data = {
-        customer: {
-            id: customerId,
-            name: customerName,
-            email: customerEmail
-        },
-        cartItems: cartItems
-    };
+    const cartItems = [];
+    document.querySelectorAll('.cart-item').forEach(item => {
+        cartItems.push({
+            id: item.querySelector('.itemID').value,
+            name: item.querySelector('.itemName').value,
+            price: parseFloat(item.querySelector('.itemPrice').value),
+            quantity: parseFloat(item.querySelector('.itemQuantity').value)
+        });
+    });
 
-    fetch('http://localhost:8080/create-transaction', {
+    fetch('/create-transaction', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            customer: { id: customerId, name: customerName, email: customerEmail },
+            cartItems: cartItems
+        })
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('transactionID').value = data.transactionID;
-        document.getElementById('message').textContent = 'Transaction created successfully!';
+        document.getElementById('message').innerText = `Transaction created with ID: ${data.transactionID}`;
+        // Clear the form
+        document.getElementById('transactionForm').reset();
+        document.getElementById('cartItems').innerHTML = '';
     })
     .catch(error => {
-        document.getElementById('message').textContent = 'Error creating transaction: ' + error;
+        document.getElementById('message').innerText = `Error creating transaction: ${error}`;
     });
 }
 
 function processPayment() {
     const transactionID = document.getElementById('transactionID').value;
-    const paymentForm = JSON.parse(document.getElementById('paymentForm').value);
-    const customerId = getCustomerId();
+    const cardNumber = document.getElementById('cardNumber').value;
+    const expirationDate = document.getElementById('expirationDate').value;
+    const cvv = document.getElementById('cvv').value;
+    const name = document.getElementById('name').value;
+    const address = document.getElementById('address').value;
 
-    const data = {
-        transactionID: transactionID,
-        paymentForm: paymentForm
-    };
-
-    fetch('http://localhost:8080/process-payment', {
+    fetch('/process-payment', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            transactionID: transactionID,
+            paymentForm: {
+                cardNumber: cardNumber,
+                expirationDate: expirationDate,
+                cvv: cvv,
+                name: name,
+                address: address
+            }
+        })
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('message').textContent = 'Payment processed successfully!';
+        document.getElementById('message').innerText = `Payment status: ${data.status}`;
     })
     .catch(error => {
-        document.getElementById('message').textContent = 'Error processing payment: ' + error;
+        document.getElementById('message').innerText = `Error processing payment: ${error}`;
     });
 }
 
 function getCustomerTransactions() {
-    const customerId = getCustomerId();
+    const customerId = document.getElementById('customerId').value;
 
-    fetch(`http://localhost:8080/transactions?customerId=${customerId}`)
+    fetch(`/transactions/${customerId}`)
     .then(response => response.json())
-    .then(transactions => {
-        const tbody = document.getElementById('transactionsTable').querySelector('tbody');
-        tbody.innerHTML = '';
-
-        transactions.forEach(transaction => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${transaction.id}</td>
-                <td>${transaction.customerName}</td>
-                <td>${transaction.customerEmail}</td>
-                <td>${transaction.status}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    })
-    .catch(error => {
-        document.getElementById('message').textContent = 'Error retrieving transactions: ' + error;
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    // Function to create a new transaction
-    window.createTransaction = function() {
-        const customerId = document.getElementById('customerId').value;
-        const customerName = document.getElementById('customerName').value;
-        const customerEmail = document.getElementById('customerEmail').value;
-        const cartItems = JSON.parse(document.getElementById('cartItems').value);
-
-        const data = {
-            customer: {
-                id: customerId,
-                name: customerName,
-                email: customerEmail
-            },
-            cartItems: cartItems
-        };
-
-        fetch('/create-transaction', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('message').innerText = 'Transaction created with ID: ' + data.transactionID;
-        })
-        .catch(error => {
-            console.error('Error creating transaction:', error);
-            document.getElementById('message').innerText = 'Error creating transaction: ' + error;
-        });
-    };
-
-    // Function to process a payment
-    window.processPayment = function() {
-        const transactionID = document.getElementById('transactionID').value;
-        const customerId = document.getElementById('customerId').value;
-        const paymentForm = JSON.parse(document.getElementById('paymentForm').value);
-
-        const data = {
-            transactionID: transactionID,
-            customerId: customerId,
-            paymentForm: paymentForm
-        };
-
-        fetch('/process-payment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('message').innerText = 'Payment processed successfully';
-        })
-        .catch(error => {
-            console.error('Error processing payment:', error);
-            document.getElementById('message').innerText = 'Error processing payment: ' + error;
-        });
-    };
-
-    // Function to get customer transactions
-    window.getCustomerTransactions = function() {
-        const customerId = document.getElementById('customerId').value;
-
-        fetch('/transactions/' + customerId)
-        .then(response => response.json())
-        .then(data => {
-            const tbody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
-            tbody.innerHTML = ''; // Clear existing rows
-
+    .then(data => {
+        const tableBody = document.getElementById('transactionsTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+        if (data.transactions && data.transactions.length > 0) {
             data.transactions.forEach(transaction => {
-                const row = tbody.insertRow();
+                const row = tableBody.insertRow();
                 row.insertCell(0).innerText = transaction.id;
                 row.insertCell(1).innerText = transaction.customerName;
                 row.insertCell(2).innerText = transaction.customerEmail;
                 row.insertCell(3).innerText = transaction.status;
             });
-        })
-        .catch(error => {
-            console.error('Error fetching transactions:', error);
-            document.getElementById('message').innerText = 'Error fetching transactions: ' + error;
-        });
-    };
-});
+        } else {
+            document.getElementById('message').innerText = 'No transactions found for this customer.';
+        }
+    })
+    .catch(error => {
+        document.getElementById('message').innerText = `Error fetching transactions: ${error}`;
+    });
+}

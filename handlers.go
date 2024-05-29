@@ -23,6 +23,7 @@ func CreateTransactionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return transaction ID to the client
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"transactionID": transactionID})
 }
 

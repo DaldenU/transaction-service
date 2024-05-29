@@ -4,19 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Transaction</title>
+    <style>
+        form {
+            max-width: 500px;
+            margin: auto;
+        }
+        label, input, button, textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .cart-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Create Transaction</h1>
-    <label for="customerId">Customer ID:</label>
-    <input type="text" id="customerId">
-    <label for="customerName">Customer Name:</label>
-    <input type="text" id="customerName">
-    <label for="customerEmail">Customer Email:</label>
-    <input type="text" id="customerEmail">
-    <label for="cartItems">Cart Items (JSON):</label>
-    <textarea id="cartItems"></textarea>
-    <button onclick="createTransaction()">Create Transaction</button>
+    <form id="transactionForm">
+        <label for="customerId">Customer ID:</label>
+        <input type="text" id="customerId" required>
+        <label for="customerName">Customer Name:</label>
+        <input type="text" id="customerName" required>
+        <label for="customerEmail">Customer Email:</label>
+        <input type="email" id="customerEmail" required>
+        <h3>Cart Items:</h3>
+        <div id="cartItems"></div>
+        <button type="button" onclick="addCartItem()">Add Cart Item</button>
+        <button type="button" onclick="createTransaction()">Create Transaction</button>
+    </form>
     <p id="message"></p>
     <script src="/static/script.js"></script>
+    <script>
+        function addCartItem() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const cartItemDiv = document.createElement('div');
+            cartItemDiv.className = 'cart-item';
+            cartItemDiv.innerHTML = `
+                <label for="itemID">Item ID:</label>
+                <input type="text" class="itemID" required>
+                <label for="itemName">Item Name:</label>
+                <input type="text" class="itemName" required>
+                <label for="itemPrice">Item Price:</label>
+                <input type="number" class="itemPrice" required>
+                <label for="itemQuantity">Item Quantity:</label>
+                <input type="number" class="itemQuantity" required>
+                <button type="button" onclick="removeCartItem(this)">Remove</button>
+            `;
+            cartItemsDiv.appendChild(cartItemDiv);
+        }
+
+        function removeCartItem(button) {
+            button.parentElement.remove();
+        }
+    </script>
 </body>
 </html>
