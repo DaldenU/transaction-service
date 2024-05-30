@@ -36,8 +36,6 @@ func GenerateReceipt(transaction Transaction, transactionRequest TransactionRequ
 	pdf.Ln(10)
 	pdf.Cell(40, 10, fmt.Sprintf("Customer Email: %s", transaction.CustomerEmail))
 	pdf.Ln(10)
-	pdf.Cell(40, 10, fmt.Sprintf("Status: %s", transaction.Status))
-	pdf.Ln(10)
 	pdf.Cell(40, 10, fmt.Sprintf("Date: %s", time.Now().Format(time.RFC1123)))
 	pdf.Ln(10)
 	pdf.Cell(40, 10, "=============================================")

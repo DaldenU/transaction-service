@@ -26,7 +26,6 @@ func CreateTransactionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"transactionID": transactionID})
 }
-
 func ProcessPaymentHandler(w http.ResponseWriter, r *http.Request) {
 	var req PaymentRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -35,17 +34,21 @@ func ProcessPaymentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Simulate successful payment
+	transaction, err := GetTransaction(req.TransactionID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if transaction.Status == "paid" {
+		json.NewEncoder(w).Encode(map[string]string{"status": "Already paid"})
+		return
+	}
+
 	success := true
 
 	if success {
 		err := UpdateTransactionStatus(req.TransactionID, "paid")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		transaction, err := GetTransaction(req.TransactionID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
